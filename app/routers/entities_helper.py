@@ -98,14 +98,16 @@ def extract_text_body(url, retries=3):
             page = requests.get(url)
             page.raise_for_status()  # raise exceptions for http errors
         except requests.exceptions.RequestException as e:
-            raise HTTPException(status_code=404, detail=e)
+            raise HTTPException(status_code=404, detail="Unable to connect to the URL.")
         except Exception as e:
             if i < retries:
                 print(f"Try ({i}) failed. Retrying in 1s...")
                 time.sleep(1)
                 continue
             else:
-                raise HTTPException(status_code=404, detail=e)
+                raise HTTPException(
+                    status_code=404, detail="Unable to connect to the URL."
+                )
 
     # Initialise BeautifulSoup
     soup = BeautifulSoup(page.content, "html.parser")
