@@ -2,6 +2,7 @@
 
 # Deploy
 [![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
+- Note: Incomplete -> My database is currently running as a separate docker container.
 
 # Setup
 - Docker - https://docs.docker.com/engine/install/
