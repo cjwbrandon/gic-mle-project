@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import requests
 from bs4 import BeautifulSoup
 import re
@@ -21,7 +22,16 @@ def extract_text_body(url, retries=3):
     -------
     string
         Text body of the url
+
+    Raises
+    ------
+    AssertionException
+        Input URL must be of type string
+    AssertionException
+        Input URL cannot be empty
     """
+    assert type(url) == str, "Input URL must be of type string."
+    assert url != "", "Input URL cannot be empty."
 
     for i in range(retries):
         try:
@@ -29,12 +39,14 @@ def extract_text_body(url, retries=3):
             page = requests.get(url)
             page.raise_for_status()  # raise exceptions for http errors
         except requests.exceptions.RequestException as e:
-            raise SystemExit(e)
+            raise HTTPException(status_code=404, detail=e.message)
         except Exception as e:
             if i < retries:
-                print(f"Try ({i}) failed. Retrying in 5s...")
-                time.sleep(5)
+                print(f"Try ({i}) failed. Retrying in 1s...")
+                time.sleep(1)
                 continue
+            else:
+                raise HTTPException(status_code=404, detail=e.message)
 
     # Initialise BeautifulSoup
     soup = BeautifulSoup(page.content, "html.parser")
