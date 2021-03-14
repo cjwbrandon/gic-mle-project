@@ -7,6 +7,7 @@ import spacy
 import en_core_web_sm
 import pandas as pd
 
+from utils.db_utils import engine
 
 # Extract
 #########
@@ -39,14 +40,14 @@ def extract_text_body(url, retries=3):
             page = requests.get(url)
             page.raise_for_status()  # raise exceptions for http errors
         except requests.exceptions.RequestException as e:
-            raise HTTPException(status_code=404, detail=e.message)
+            raise HTTPException(status_code=404, detail=e)
         except Exception as e:
             if i < retries:
                 print(f"Try ({i}) failed. Retrying in 1s...")
                 time.sleep(1)
                 continue
             else:
-                raise HTTPException(status_code=404, detail=e.message)
+                raise HTTPException(status_code=404, detail=e)
 
     # Initialise BeautifulSoup
     soup = BeautifulSoup(page.content, "html.parser")
@@ -88,3 +89,32 @@ def extract_entities_w_spacy(text):
     return pd.DataFrame(
         [(X.text, X.label_) for X in doc.ents], columns=["text", "entity"]
     )
+
+
+# Load data to database
+#######################
+def insert_entities_to_database(entities, engine=engine, retries=3):
+    """Insert entities data to database
+    
+    Parameters
+    ----------
+    entities : pandas.DataFrame
+        Table of entities and text
+    engine : SQLAlchemy.engine
+        engine
+    """
+    for i in range(retries):
+        try:
+            entities.to_sql(
+                "entities", engine, schema="nlp", if_exists="append", index=False
+            )
+        except Exception as e:
+            if i < retries:
+                print(f"Try ({i}) failed. Retrying in 1s...")
+                time.sleep(1)
+                continue
+            else:
+                raise HTTPException(
+                    status_code=503, detail="Database service is unavailable."
+                )
+
