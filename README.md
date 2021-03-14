@@ -7,6 +7,9 @@
 # Usage
 - Dev
   - Run `docker-compose up --build`
+- Test
+  - Run `docker build --file Dockerfile.test -t nlp_app_test .`
+  - Run `docker run nlp_app_test`
 
 # Folder Structure
 - `/app` - Store application-related code.
