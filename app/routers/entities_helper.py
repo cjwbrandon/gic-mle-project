@@ -9,8 +9,28 @@ import pandas as pd
 
 from utils.db_utils import engine
 
-# Extract
-#########
+# Get distinct entities extracted
+def select_distinct_entities(engine=engine):
+    """Pull all distinct entities extracted
+    
+    Parameters
+    ----------
+    engine : SQLAlchemy.engine
+        engine
+    
+    Returns
+    -------
+    list
+        List of all the distinct entity.
+    """
+
+    with engine.connect() as conn:
+        entities = conn.execute("SELECT DISTINCT(entity) entities FROM nlp.entities")
+    entities = entities.fetchall()
+    return [ent[0] for ent in entities]
+
+
+# Scrape data from URL
 def extract_text_body(url, retries=3):
     """Extract text body of a url
     
@@ -59,8 +79,7 @@ def extract_text_body(url, retries=3):
     return " ".join(re.split(r"[\n\t\s]+", soup.get_text()))
 
 
-# Transform
-###########
+# Extract entities from text
 def extract_entities_w_spacy(text):
     """Extract entities from input text using Spacy.
     
@@ -92,8 +111,7 @@ def extract_entities_w_spacy(text):
     return entities.drop_duplicates(["entity", "text"], keep="first")
 
 
-# Load data to database
-#######################
+# Load entities to database
 def insert_entities_to_database(entities, engine=engine, retries=3):
     """Insert entities data to database
     
