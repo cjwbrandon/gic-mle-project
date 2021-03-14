@@ -23,11 +23,49 @@ def select_distinct_entities(engine=engine):
     list
         List of all the distinct entity.
     """
-
+    # Execute SQL query for all distinct entities
     with engine.connect() as conn:
         entities = conn.execute("SELECT DISTINCT(entity) entities FROM nlp.entities")
     entities = entities.fetchall()
     return [ent[0] for ent in entities]
+
+
+def select_text_given_entity(entity, engine=engine):
+    """Retrieve all texts assocaited with an entity.
+    
+    Parameters
+    ----------
+    entity : str
+        entity to filter by
+    engine : SQLAlchemy.engine
+        engine
+        
+    Returns
+    -------
+    list
+        List of text associated with the entity
+        
+    Raises
+    ------
+    AssertionException
+        Input entity must be of type string
+    AssertionException
+        Input entity cannot be empty
+    """
+    assert type(entity) == str, "Input entity must be of type string."
+    assert entity != "", "Input entity cannot be empty."
+
+    # Convert search entry to upper since all entities are in upper case
+    entity = entity.upper()
+
+    # Execute SQL query for text filtered by input entity
+    with engine.connect() as conn:
+        text = conn.execute(f"SELECT text FROM nlp.entities WHERE entity = '{entity}'")
+    text = text.fetchall()
+    if text == []:
+        raise HTTPException(status_code=404, detail="Entity not found.")
+
+    return [t[0] for t in text]
 
 
 # Scrape data from URL

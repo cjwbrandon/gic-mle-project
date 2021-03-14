@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 from routers.entities_helper import (
     select_distinct_entities,
+    select_text_given_entity,
     extract_text_body,
     extract_entities_w_spacy,
     insert_entities_to_database,
@@ -19,6 +20,11 @@ router = APIRouter(prefix="/entities")
 @router.get("/")
 def get_entities():
     return {"entities": select_distinct_entities()}
+
+
+@router.get("/{entity}")
+def get_entity_texts(entity: str):
+    return {entity: select_text_given_entity(entity)}
 
 
 @router.post("/extract/")
