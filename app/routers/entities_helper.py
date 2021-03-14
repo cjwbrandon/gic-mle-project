@@ -86,9 +86,10 @@ def extract_entities_w_spacy(text):
 
     nlp = en_core_web_sm.load()
     doc = nlp(text)
-    return pd.DataFrame(
+    entities = pd.DataFrame(
         [(X.text, X.label_) for X in doc.ents], columns=["text", "entity"]
     )
+    return entities.drop_duplicates(["entity", "text"], keep="first")
 
 
 # Load data to database
@@ -103,11 +104,27 @@ def insert_entities_to_database(entities, engine=engine, retries=3):
     engine : SQLAlchemy.engine
         engine
     """
+
+    # Attempt to insert data to main table, on conflict, do nothing
+    upsert_sql = """
+INSERT INTO nlp.entities ("entity", "text")
+SELECT "entity", "text"
+FROM nlp.entities_temp
+ON CONFLICT ("entity", "text")
+DO NOTHING;
+    """
+
     for i in range(retries):
         try:
+            # Push table to a temporary table
             entities.to_sql(
-                "entities", engine, schema="nlp", if_exists="append", index=False
+                "entities_temp", engine, schema="nlp", if_exists="replace", index=False
             )
+
+            # Execute upsert sql statement and remove temporary table after.
+            conn = engine.connect()
+            conn.execute(upsert_sql)
+            conn.execute("DROP TABLE nlp.entities_temp")
         except Exception as e:
             if i < retries:
                 print(f"Try ({i}) failed. Retrying in 1s...")
@@ -117,4 +134,6 @@ def insert_entities_to_database(entities, engine=engine, retries=3):
                 raise HTTPException(
                     status_code=503, detail="Database service is unavailable."
                 )
+        finally:
+            conn.close()
 
