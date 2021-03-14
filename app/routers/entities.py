@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from router.entities_helper import (
+from routers.entities_helper import (
     extract_text_body,
     extract_entities_w_spacy,
     insert_entities_to_database,
@@ -17,8 +17,6 @@ router = APIRouter()
 
 @router.post("/entities/extract/")
 async def extract_entities(url: URL):
-    url = url.dict().url
-
     # Attempt scraping of text body from url
     contents = extract_text_body(url.url)
 

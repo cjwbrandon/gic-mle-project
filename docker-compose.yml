@@ -10,3 +10,12 @@ services:
       - "5432:5432"
     volumes:
       - ./postgres_init:/docker-entrypoint-initdb.d
+
+  nlp_app:
+    build: .
+    restart: on-failure
+    ports:
+      - "80:80"
+    environment:
+      - DB_URL=postgresql://postgres:postgres@postgres:5432/postgres
+      - MAX_WORKERS=4
