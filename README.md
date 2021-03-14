@@ -1,5 +1,8 @@
 # gic-mle-project
 
+# Deploy
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
+
 # Setup
 - Docker - https://docs.docker.com/engine/install/
 - Docker Compose for dev - https://docs.docker.com/compose/install/

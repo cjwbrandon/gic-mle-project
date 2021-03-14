@@ -18,12 +18,12 @@ router = APIRouter(prefix="/entities")
 
 
 @router.get("/")
-def get_entities():
+async def get_entities():
     return {"entities": select_distinct_entities()}
 
 
 @router.get("/{entity}")
-def get_entity_texts(entity: str):
+async def get_entity_texts(entity: str):
     return {entity: select_text_given_entity(entity)}
 
 
