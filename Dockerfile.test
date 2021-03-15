@@ -1,0 +1,19 @@
+# https://github.com/tiangolo/uvicorn-gunicorn-docker
+FROM python:3.7
+
+RUN apt-get update -y
+RUN apt-get install python3-pip -y
+
+COPY ./dependencies dependencies
+RUN pip3 install -r dependencies/requirements.txt -r dependencies/requirements.test.txt
+RUN ["python", "-m", "spacy", "download", "en_core_web_sm"]
+
+COPY ./app /app
+COPY ./configs/pytest.ini pytest.ini
+
+ENV PYTHONPATH=/app
+ENV DB_URL="postgresql://postgres:postgres@localhost:5432/postgres"
+
+# Run the start script, it will check for an /app/prestart.sh script (e.g. for migrations)
+# And then will start Gunicorn with Uvicorn
+CMD ["pytest", "-c", "pytest.ini"]
