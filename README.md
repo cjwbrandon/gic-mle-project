@@ -1,4 +1,13 @@
 # gic-mle-project
+Creating an API that extracts entities from websites.
+
+Details:
+1. API development is done using FastAPI.
+2. A PostgreSQL database is used as its database. Database connection is done using SQLAlchemy.
+3. NLP entity extraction is done using Spacy.
+4. Docker is used to manage the different environment.
+5. Docker compose is used to configure the application and database containers together.
+6. Testing is done using the PyTest library.
 
 # Deploy
 [![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run)
